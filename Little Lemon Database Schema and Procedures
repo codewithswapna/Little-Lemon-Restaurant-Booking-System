@@ -1,0 +1,94 @@
+-- Create database
+CREATE DATABASE IF NOT EXISTS LittleLemonDB;
+USE LittleLemonDB;
+
+-- Create tables
+CREATE TABLE Customers (
+    CustomerID INT PRIMARY KEY AUTO_INCREMENT,
+    FirstName VARCHAR(100),
+    LastName VARCHAR(100),
+    Email VARCHAR(255),
+    PhoneNumber VARCHAR(20)
+);
+
+CREATE TABLE Tables (
+    TableID INT PRIMARY KEY AUTO_INCREMENT,
+    Capacity INT,
+    Status VARCHAR(20)
+);
+
+CREATE TABLE Bookings (
+    BookingID INT PRIMARY KEY AUTO_INCREMENT,
+    CustomerID INT,
+    TableID INT,
+    BookingDate DATE,
+    BookingTime TIME,
+    PartySize INT,
+    Status VARCHAR(20),
+    FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID),
+    FOREIGN KEY (TableID) REFERENCES Tables(TableID)
+);
+
+-- GetMaxQuantity procedure
+DELIMITER //
+CREATE PROCEDURE GetMaxQuantity()
+BEGIN
+    SELECT MAX(PartySize) AS MaxQuantity
+    FROM Bookings;
+END //
+DELIMITER ;
+
+-- ManageBooking procedure
+DELIMITER //
+CREATE PROCEDURE ManageBooking(
+    IN booking_id INT,
+    IN status VARCHAR(20)
+)
+BEGIN
+    UPDATE Bookings 
+    SET Status = status
+    WHERE BookingID = booking_id;
+END //
+DELIMITER ;
+
+-- UpdateBooking procedure
+DELIMITER //
+CREATE PROCEDURE UpdateBooking(
+    IN booking_id INT,
+    IN booking_date DATE,
+    IN table_id INT
+)
+BEGIN
+    UPDATE Bookings 
+    SET BookingDate = booking_date,
+        TableID = table_id
+    WHERE BookingID = booking_id;
+END //
+DELIMITER ;
+
+-- AddBooking procedure
+DELIMITER //
+CREATE PROCEDURE AddBooking(
+    IN customer_id INT,
+    IN table_id INT,
+    IN booking_date DATE,
+    IN booking_time TIME,
+    IN party_size INT
+)
+BEGIN
+    INSERT INTO Bookings (CustomerID, TableID, BookingDate, BookingTime, PartySize, Status)
+    VALUES (customer_id, table_id, booking_date, booking_time, party_size, 'Confirmed');
+END //
+DELIMITER ;
+
+-- CancelBooking procedure
+DELIMITER //
+CREATE PROCEDURE CancelBooking(
+    IN booking_id INT
+)
+BEGIN
+    UPDATE Bookings 
+    SET Status = 'Cancelled'
+    WHERE BookingID = booking_id;
+END //
+DELIMITER ;
